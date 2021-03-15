@@ -4,7 +4,7 @@ import * as dynamodb from '@aws-cdk/aws-dynamodb';
 import * as events from '@aws-cdk/aws-events';
 import * as eventsTargets from '@aws-cdk/aws-events-targets';
 import * as lambda from '@aws-cdk/aws-lambda';
-// import { EVENT_SOURCE, requestTemplate, responseTemplate } from '../utils/appsync-request-response';
+import { EVENT_SOURCE, requestTemplate, responseTemplate } from '../utils/appsync-request-response';
 
 export class BackendStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -52,13 +52,30 @@ export class BackendStack extends cdk.Stack {
 
     events.EventBus.grantAllPutEvents(httpEventTriggerDS);
 
-    // resolver
-    todoTable.createResolver({
-      typeName: "Query",
-      fieldName: "getTodos",
-      requestMappingTemplate: appsync.MappingTemplate.dynamoDbScanTable(),
-      responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultList(),
-    });
+    // Resolver
+    // todoTable.createResolver({
+    //   typeName: "Query",
+    //   fieldName: "getTodos",
+    //   requestMappingTemplate: appsync.MappingTemplate.dynamoDbScanTable(),
+    //   responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultList(),
+    // });
+
+    // const mutations = ["addTodo","deleteTodo"]
+   
+    // mutations.forEach((mut) => {
+    //   let details = `\\\"id\\\": \\\"$ctx.args.id\\\"`;
+
+    //   if (mut === 'addTodo') {
+    //     details = `\\\"task\\\":\\\"$ctx.args.todo.task\\\", \\\"done\\\":\\\"$ctx.args.todo.done\\\", \\\"id\\\":\\\"$ctx.args.todo.id\\\"`
+    //   } 
+
+    //   httpEventTriggerDS.createResolver({
+    //     typeName: "Mutation",
+    //     fieldName: mut,
+    //     requestMappingTemplate: appsync.MappingTemplate.fromString(requestTemplate(details, mut)),
+    //     responseMappingTemplate: appsync.MappingTemplate.fromString(responseTemplate()),
+    //   });
+    // });
     
 
     
