@@ -88,11 +88,14 @@ export class BackendStack extends cdk.Stack {
 
     // Giving Table access to dynamoHandlerLambda
     todoTableEvent .grantReadWriteData(dynamoHandlerLambda);
-    
 
-    
-
-    
+    new events.Rule(this, "TodoTableRule", {
+      targets:[new eventsTargets.LambdaFunction(dynamoHandlerLambda)],
+      eventPattern: {
+        source: [EVENT_SOURCE],
+        detailType: [...mutations],
+      },
+    });   
 
     new cdk.CfnOutput(this, 'Graphql_Endpoint', {
       value: api.graphqlUrl
