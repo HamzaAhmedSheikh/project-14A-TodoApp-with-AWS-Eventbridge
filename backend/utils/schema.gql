@@ -3,8 +3,7 @@ type Event {
 }
 
 type Todo {
-  task: String
-  done: Boolean
+  task: String  
   id: String!
 }
 
@@ -13,8 +12,7 @@ type Query {
 }
 
 input TodoInput {  
-  task: String
-  done: Boolean
+  task: String  
   id: String!
 }
 

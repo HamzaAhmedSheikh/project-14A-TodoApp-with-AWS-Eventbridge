@@ -66,7 +66,7 @@ export class BackendStack extends cdk.Stack {
       let details = `\\\"id\\\": \\\"$ctx.args.id\\\"`;
 
       if (mut === 'addTodo') {
-        details = `\\\"task\\\":\\\"$ctx.args.todo.task\\\", \\\"done\\\":\\\"$ctx.args.todo.done\\\", \\\"id\\\":\\\"$ctx.args.todo.id\\\"`
+        details = `\\\"task\\\":\\\"$ctx.args.todo.task\\\", \\\"id\\\":\\\"$ctx.args.todo.id\\\"`
       } 
 
       httpEventTriggerDS.createResolver({
