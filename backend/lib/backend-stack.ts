@@ -35,6 +35,32 @@ export class BackendStack extends cdk.Stack {
 
     ///Attaching Datasource to api
     const todoTable = api.addDynamoDbDataSource('todoAppTable', todoTableEvent);
+
+    // Create Http Data source that will put our event to the eventbus
+    const httpEventTriggerDS = api.addHttpDataSource(
+      "eventTriggerDS",
+      "https://events." + this.region + ".amazonaws.com/", // This is the ENDPOINT for eventbridge.
+      {
+        name: "httpDsWithEventBridge",
+        description: "From Appsync to Eventbridge",
+        authorizationConfig: {
+          signingRegion: this.region,
+          signingServiceName: "events",
+        },
+      }
+    );
+
+    events.EventBus.grantAllPutEvents(httpEventTriggerDS);
+
+    // resolver
+    todoTable.createResolver({
+      typeName: "Query",
+      fieldName: "getTodos",
+      requestMappingTemplate: appsync.MappingTemplate.dynamoDbScanTable(),
+      responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultList(),
+    });
+    
+
     
 
     
