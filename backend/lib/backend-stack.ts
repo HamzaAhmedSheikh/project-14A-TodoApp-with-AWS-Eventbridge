@@ -53,29 +53,41 @@ export class BackendStack extends cdk.Stack {
     events.EventBus.grantAllPutEvents(httpEventTriggerDS);
 
     // Resolver
-    // todoTable.createResolver({
-    //   typeName: "Query",
-    //   fieldName: "getTodos",
-    //   requestMappingTemplate: appsync.MappingTemplate.dynamoDbScanTable(),
-    //   responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultList(),
-    // });
+    todoTable.createResolver({
+      typeName: "Query",
+      fieldName: "getTodos",
+      requestMappingTemplate: appsync.MappingTemplate.dynamoDbScanTable(),
+      responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultList(),
+    });
 
-    // const mutations = ["addTodo","deleteTodo"]
+    const mutations = ["addTodo","deleteTodo"]
    
-    // mutations.forEach((mut) => {
-    //   let details = `\\\"id\\\": \\\"$ctx.args.id\\\"`;
+    mutations.forEach((mut) => {
+      let details = `\\\"id\\\": \\\"$ctx.args.id\\\"`;
 
-    //   if (mut === 'addTodo') {
-    //     details = `\\\"task\\\":\\\"$ctx.args.todo.task\\\", \\\"done\\\":\\\"$ctx.args.todo.done\\\", \\\"id\\\":\\\"$ctx.args.todo.id\\\"`
-    //   } 
+      if (mut === 'addTodo') {
+        details = `\\\"task\\\":\\\"$ctx.args.todo.task\\\", \\\"done\\\":\\\"$ctx.args.todo.done\\\", \\\"id\\\":\\\"$ctx.args.todo.id\\\"`
+      } 
 
-    //   httpEventTriggerDS.createResolver({
-    //     typeName: "Mutation",
-    //     fieldName: mut,
-    //     requestMappingTemplate: appsync.MappingTemplate.fromString(requestTemplate(details, mut)),
-    //     responseMappingTemplate: appsync.MappingTemplate.fromString(responseTemplate()),
-    //   });
-    // });
+      httpEventTriggerDS.createResolver({
+        typeName: "Mutation",
+        fieldName: mut,
+        requestMappingTemplate: appsync.MappingTemplate.fromString(requestTemplate(details, mut)),
+        responseMappingTemplate: appsync.MappingTemplate.fromString(responseTemplate()),
+      });
+    });
+
+    const dynamoHandlerLambda = new lambda.Function(this, 'Dynamo_Handler', {
+      code: lambda.Code.fromAsset('lambda'),
+      runtime: lambda.Runtime.NODEJS_12_X,
+      handler: 'dynamoHandler.handler',
+      environment: {
+        DYNAMO_TABLE_NAME:  todoTableEvent .tableName,
+      }     
+    });
+
+    // Giving Table access to dynamoHandlerLambda
+    todoTableEvent .grantReadWriteData(dynamoHandlerLambda);
     
 
     
