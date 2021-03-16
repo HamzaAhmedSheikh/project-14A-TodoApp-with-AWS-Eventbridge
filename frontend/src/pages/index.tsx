@@ -39,14 +39,14 @@ const MyStyle = makeStyles(() => ({
     background: "#f9f9f9",
     padding: "10px 20px",
     marginBottom: "4px",
-    backgroundColor: "#f1f1f1",    
+    backgroundColor: "#f1f1f1",
   },
   loadingWrapper: {
     display: "flex",
     justifyContent: "center",
     marginTop: "10px",
     height: "100px",
-  },  
+  },
   title: {
     flexGrow: 1,
     textAlign: "center",
@@ -71,12 +71,20 @@ const createTodos = `
   }  
 `;
 
+const deleteTodos = `
+  mutation deleteTodo($id: String) {
+    deleteTodo(id: $id) {
+      result
+    }
+  }
+`;
+
 const IndexPage = () => {
   const classes = MyStyle();
   const [data, setData] = useState<any>();
   const [message, setMessage] = useState<string>("");
   const [loading, setLoading] = useState(false);
- 
+
   useEffect(() => {
     (async () => {
       const data: any = await API.graphql({ query: allTodos });
@@ -84,7 +92,7 @@ const IndexPage = () => {
 
       setData({ getTodos: data.data.getTodos });
     })();
-  }, [setData]); 
+  }, [setData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -113,14 +121,65 @@ const IndexPage = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    console.log("delete id ====> ", id);
+    // console.log('result ===> ', result);
+
+    setLoading(true);
+
+    let deleteData = await API.graphql({
+      query: deleteTodos,
+      variables: { id: id },
+    });
+
+    console.log("delete data ===> ", deleteData);
+
+    let Datadel = await data.getTodos.filter((item) => {
+      return item.id !== id;
+    });
+
+    if (Datadel) {
+      setData({ getTodos: Datadel });
+      setLoading(false);
+    }
+  };
 
   return (
     <div>
-      <h1> Home Page </h1>   
-      <input type='text' value={message}  onChange={(e) => setMessage(e.target.value)}/>
-      <button onClick={handleSubmit}> Add </button>   
-    </div>
-  )
-}
+      <h1> Home Page </h1>
+      <input
+        type="text"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+      />
+      <button onClick={handleSubmit}> Add </button>
 
-export default IndexPage
+      <div className={classes.contentWrapper}>
+        <Box py={1}>
+          {!data || loading ? (
+            <div className={classes.loadingWrapper}>
+              <CircularProgress />
+            </div>
+          ) : (
+            data.getTodos.map((msg) => (
+              <div key={msg.id} className={classes.Datalist}>
+                <Grid container>
+                  <Grid item xs={10} container alignItems="center">
+                    <Typography className="fontStyle">{msg.task}</Typography>
+                  </Grid>
+                  <Grid container justify="flex-end" item xs={2}>
+                    <IconButton onClick={() => handleDelete(msg.id)}>
+                      <DeleteIcon color="secondary" fontSize="small" />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              </div>
+            ))
+          )}
+        </Box>
+      </div>
+    </div>
+  );
+};
+
+export default IndexPage;
