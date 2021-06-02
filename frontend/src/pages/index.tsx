@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { DocumentNode, gql } from "@apollo/client";
+import { getTodos } from "../graphql/queries";
 import { API } from "aws-amplify";
 import {
   Box,
@@ -85,15 +85,6 @@ const IndexPage = () => {
   const [message, setMessage] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      const data: any = await API.graphql({ query: allTodos });
-      console.log("dataaa ===> ", data);
-
-      setData({ getTodos: data.data.getTodos });
-    })();
-  }, [setData]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const id: string = shortId.generate();
@@ -121,6 +112,16 @@ const IndexPage = () => {
     }
   };
 
+  useEffect(() => {
+    (async () => {
+      const data: any = await API.graphql({ query: allTodos });
+      console.log("dataaaaaa =====> ", data);
+
+      setData({ getTodos: data.data.getTodos });
+    })();
+  }, [setData]);
+
+  
   const handleDelete = async (id) => {
     console.log("delete id ====> ", id);
     // console.log('result ===> ', result);
@@ -131,7 +132,7 @@ const IndexPage = () => {
       query: deleteTodos,
       variables: { id: id },
     });
-
+    
     console.log("delete data ===> ", deleteData);
 
     let Datadel = await data.getTodos.filter((item) => {
@@ -146,38 +147,63 @@ const IndexPage = () => {
 
   return (
     <div>
-      <h1> Home Page </h1>
-      <input
-        type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-      />
-      <button onClick={handleSubmit}> Add </button>
-
-      <div className={classes.contentWrapper}>
-        <Box py={1}>
-          {!data || loading ? (
-            <div className={classes.loadingWrapper}>
-              <CircularProgress />
-            </div>
-          ) : (
-            data.getTodos.map((msg) => (
-              <div key={msg.id} className={classes.Datalist}>
-                <Grid container>
-                  <Grid item xs={10} container alignItems="center">
-                    <Typography className="fontStyle">{msg.task}</Typography>
-                  </Grid>
-                  <Grid container justify="flex-end" item xs={2}>
-                    <IconButton onClick={() => handleDelete(msg.id)}>
-                      <DeleteIcon color="secondary" fontSize="small" />
-                    </IconButton>
-                  </Grid>
-                </Grid>
-              </div>
-            ))
-          )}
-        </Box>
-      </div>
+      <AppBar position="static" color="primary">
+        <Toolbar>
+          <Typography variant="h6" className={classes.title}>
+            Serverless JAMstack TodoApp
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Container>
+        <div className={classes.mainContainer}>
+          <div className={classes.formContainer}>
+            <Box p={4}>
+              <form onSubmit={handleSubmit}>
+                <Box pb={2}>
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    label="Message"
+                    name="task"
+                    required
+                  />
+                </Box>
+                <Button type="submit" variant="contained" color="primary">
+                  add task
+                </Button>
+              </form>
+            </Box>
+          </div>
+          <div className={classes.contentWrapper}>
+            <Box py={1}>
+              {!data || loading ? (
+                <div className={classes.loadingWrapper}>
+                  <CircularProgress />
+                </div>
+              ) : (
+                data.getTodos.map((msg) => (
+                  <div key={msg.id} className={classes.Datalist}>
+                    <Grid container>
+                      <Grid item xs={10} container alignItems="center">
+                        <Typography className="fontStyle">
+                          {msg.task}
+                        </Typography>
+                      </Grid>
+                      <Grid container justify="flex-end" item xs={2}>
+                        <IconButton onClick={() => handleDelete(msg.id)}>
+                          <DeleteIcon color="secondary" fontSize="small" />
+                        </IconButton>
+                      </Grid>
+                    </Grid>
+                  </div>
+                ))
+              )}
+            </Box>
+          </div>
+        </div>
+      </Container>
     </div>
   );
 };
